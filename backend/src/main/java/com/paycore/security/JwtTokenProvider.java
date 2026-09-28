@@ -50,6 +50,10 @@ public class JwtTokenProvider {
             System.err.println("JWT token is expired: " + e.getMessage());
         } catch (UnsupportedJwtException e) {
             System.err.println("JWT token is unsupported: " + e.getMessage());
+        } catch (JwtException e) {
+            // Includes signature/security failures. Invalid tokens must never escape
+            // the validation boundary as an unhandled runtime exception.
+            System.err.println("JWT validation failed: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             System.err.println("JWT claims string is empty: " + e.getMessage());
         }
