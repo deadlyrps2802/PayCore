@@ -11,6 +11,8 @@ import com.paycore.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +40,6 @@ public class AuthController {
         if (userRepository.existsByEmail(email)) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(false, "An account with this email already exists"));
         }
-
         User user = new User(email, passwordEncoder.encode(request.getPassword()), Role.ROLE_EMPLOYEE);
         userRepository.save(user);
         return ResponseEntity.ok(new ApiResponse<>(true, "Account created successfully. You can now sign in.", null));
@@ -46,6 +47,12 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<Object>> getCurrentUser() {
-        return ResponseEntity.ok(new ApiResponse<>(true, "User context retrieved", null));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(new ApiResponse<>(false, "Not authenticated"));
+        }
+        String email = auth.getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(new ApiResponse<>(true, "User context retrieved", user));
     }
 }
