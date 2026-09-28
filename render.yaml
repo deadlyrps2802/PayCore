@@ -7,11 +7,24 @@ services:
     branch: main
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    autoDeploy: true
+    autoDeployTrigger: commit
+    healthCheckPath: /actuator/health
     envVars:
       - key: SPRING_DATASOURCE_URL
-        sync: false
+        fromDatabase:
+          name: paycore-db
+          property: connectionString
       - key: SPRING_DATASOURCE_USERNAME
-        sync: false
+        fromDatabase:
+          name: paycore-db
+          property: user
       - key: SPRING_DATASOURCE_PASSWORD
-        sync: false
+        fromDatabase:
+          name: paycore-db
+          property: password
+      - key: SPRING_DATASOURCE_DRIVER
+        value: org.postgresql.Driver
+      - key: SPRING_JPA_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://paycore-frontend-live.onrender.com
