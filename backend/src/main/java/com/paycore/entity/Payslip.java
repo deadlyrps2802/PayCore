@@ -16,7 +16,9 @@ public class Payslip {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(name = "month", nullable = false)
+    // 'month' is a reserved keyword in H2. Keep the Java property name
+    // for repository/service compatibility but use a safe database column.
+    @Column(name = "pay_month", nullable = false)
     private Integer month;
 
     @Column(name = "year", nullable = false)
@@ -67,6 +69,7 @@ public class Payslip {
         this.hra = hra;
         this.allowances = allowances;
         this.grossSalary = grossSalary;
+        this.grossSalary = grossSalary;
         this.pfDeduction = pfDeduction;
         this.taxDeduction = taxDeduction;
         this.unpaidLeaveDays = unpaidLeaveDays;
@@ -76,123 +79,34 @@ public class Payslip {
         this.generatedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Employee getEmployee() {
-        return employee;
-    }
-
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }
-
-    public Integer getMonth() {
-        return month;
-    }
-
-    public void setMonth(Integer month) {
-        this.month = month;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public BigDecimal getBasicSalary() {
-        return basicSalary;
-    }
-
-    public void setBasicSalary(BigDecimal basicSalary) {
-        this.basicSalary = basicSalary;
-    }
-
-    public BigDecimal getHra() {
-        return hra;
-    }
-
-    public void setHra(BigDecimal hra) {
-        this.hra = hra;
-    }
-
-    public BigDecimal getAllowances() {
-        return allowances;
-    }
-
-    public void setAllowances(BigDecimal allowances) {
-        this.allowances = allowances;
-    }
-
-    public BigDecimal getGrossSalary() {
-        return grossSalary;
-    }
-
-    public void setGrossSalary(BigDecimal grossSalary) {
-        this.grossSalary = grossSalary;
-    }
-
-    public BigDecimal getPfDeduction() {
-        return pfDeduction;
-    }
-
-    public void setPfDeduction(BigDecimal pfDeduction) {
-        this.pfDeduction = pfDeduction;
-    }
-
-    public BigDecimal getTaxDeduction() {
-        return taxDeduction;
-    }
-
-    public void setTaxDeduction(BigDecimal taxDeduction) {
-        this.taxDeduction = taxDeduction;
-    }
-
-    public Integer getUnpaidLeaveDays() {
-        return unpaidLeaveDays;
-    }
-
-    public void setUnpaidLeaveDays(Integer unpaidLeaveDays) {
-        this.unpaidLeaveDays = unpaidLeaveDays;
-    }
-
-    public BigDecimal getUnpaidLeaveDeduction() {
-        return unpaidLeaveDeduction;
-    }
-
-    public void setUnpaidLeaveDeduction(BigDecimal unpaidLeaveDeduction) {
-        this.unpaidLeaveDeduction = unpaidLeaveDeduction;
-    }
-
-    public BigDecimal getTotalDeductions() {
-        return totalDeductions;
-    }
-
-    public void setTotalDeductions(BigDecimal totalDeductions) {
-        this.totalDeductions = totalDeductions;
-    }
-
-    public BigDecimal getNetPay() {
-        return netPay;
-    }
-
-    public void setNetPay(BigDecimal netPay) {
-        this.netPay = netPay;
-    }
-
-    public LocalDateTime getGeneratedAt() {
-        return generatedAt;
-    }
-
-    public void setGeneratedAt(LocalDateTime generatedAt) {
-        this.generatedAt = generatedAt;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Employee getEmployee() { return employee; }
+    public void setEmployee(Employee employee) { this.employee = employee; }
+    public Integer getMonth() { return month; }
+    public void setMonth(Integer month) { this.month = month; }
+    public Integer getYear() { return year; }
+    public void setYear(Integer year) { this.year = year; }
+    public BigDecimal getBasicSalary() { return basicSalary; }
+    public void setBasicSalary(BigDecimal basicSalary) { this.basicSalary = basicSalary; }
+    public BigDecimal getHra() { return hra; }
+    public void setHra(BigDecimal hra) { this.hra = hra; }
+    public BigDecimal getAllowances() { return allowances; }
+    public void setAllowances(BigDecimal allowances) { this.allowances = allowances; }
+    public BigDecimal getGrossSalary() { return grossSalary; }
+    public void setGrossSalary(BigDecimal grossSalary) { this.grossSalary = grossSalary; }
+    public BigDecimal getPfDeduction() { return pfDeduction; }
+    public void setPfDeduction(BigDecimal pfDeduction) { this.pfDeduction = pfDeduction; }
+    public BigDecimal getTaxDeduction() { return taxDeduction; }
+    public void setTaxDeduction(BigDecimal taxDeduction) { this.taxDeduction = taxDeduction; }
+    public Integer getUnpaidLeaveDays() { return unpaidLeaveDays; }
+    public void setUnpaidLeaveDays(Integer unpaidLeaveDays) { this.unpaidLeaveDays = unpaidLeaveDays; }
+    public BigDecimal getUnpaidLeaveDeduction() { return unpaidLeaveDeduction; }
+    public void setUnpaidLeaveDeduction(BigDecimal unpaidLeaveDeduction) { this.unpaidLeaveDeduction = unpaidLeaveDeduction; }
+    public BigDecimal getTotalDeductions() { return totalDeductions; }
+    public void setTotalDeductions(BigDecimal totalDeductions) { this.totalDeductions = totalDeductions; }
+    public BigDecimal getNetPay() { return netPay; }
+    public void setNetPay(BigDecimal netPay) { this.netPay = netPay; }
+    public LocalDateTime getGeneratedAt() { return generatedAt; }
+    public void setGeneratedAt(LocalDateTime generatedAt) { this.generatedAt = generatedAt; }
 }
