@@ -10,6 +10,9 @@ PayCore is a full-stack Human Capital Management (HCM) platform built for managi
 - **Backend:** Java 17, Spring Boot 3.2, Spring Security (JWT), Hibernate (JPA)
 - **Database:** PostgreSQL (Production / Docker) / H2 In-Memory (Local Development)
 - **DevOps & Cloud:** Docker, Nginx, Docker Compose, Vercel (Frontend), Render (Backend)
+- **API Documentation:** OpenAPI 3 + Swagger UI
+- **Testing:** JUnit 5 + Mockito + Spring Security Test
+- **CI:** GitHub Actions
 
 ---
 
@@ -29,12 +32,12 @@ PayCore is a full-stack Human Capital Management (HCM) platform built for managi
 
 ## Project Structure Overview
 
-```
+```text
 PayCore/
 ├── backend/                              <-- Spring Boot 3 REST API
 │   ├── src/main/java/com/paycore/
 │   │   ├── config/DataInitializer.java   <-- Auto-seeds demo accounts on startup
-│   │   ├── controller/                   <-- REST Endpoints (/api/employees, /api/salary, /api/leaves)
+│   │   ├── controller/                   <-- REST Endpoints
 │   │   ├── dto/                          <-- Data Transfer Objects
 │   │   ├── entity/                       <-- Database Tables (JPA Data Models)
 │   │   ├── repository/                   <-- Spring Data JPA Repositories
@@ -44,18 +47,8 @@ PayCore/
 │
 └── frontend/                             <-- Angular 17 SPA (Feature-Based)
     └── src/app/
-        ├── core/                         <-- App Infrastructure (Auth, Tokens, Guards)
-        │   ├── guards/                   <-- Route Protection Guards
-        │   ├── interceptors/             <-- JWT Bearer Token Interceptor
-        │   ├── models/                   <-- User & Notification Data Models
-        │   └── services/                 <-- Auth & Notification HTTP Services
-        │
-        └── features/                     <-- Modular Feature Components
-            ├── dashboard/                <-- Admin & Employee Dashboard Overview
-            ├── employee/                 <-- Employee Directory Component & Service
-            ├── leave/                    <-- Leave Application & Approval Workflow
-            ├── login/                    <-- Authentication Screen
-            └── salary/                   <-- Salary Configuration & Payslip Generator
+        ├── core/                         <-- Auth, Tokens, Guards, Interceptors
+        └── features/                     <-- Dashboard, Employee, Leave, Login, Salary
 ```
 
 ---
@@ -69,6 +62,8 @@ The application automatically seeds initial demo accounts on startup:
 | **Admin** | `admin@paycore.com` | `Password123!` | `EMP-1001` |
 | **Employee** | `employee@paycore.com` | `Password123!` | `EMP-1002` |
 
+> For a shared/public repository, replace demo credentials before production deployment and never commit real secrets.
+
 ---
 
 ## Quickstart Guide
@@ -80,11 +75,11 @@ Requires JDK 17+:
 
 ```bash
 cd backend
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
-- Backend REST API running on `http://localhost:8080`
-- H2 Database Console at `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:paycoredb`, Username: `sa`, Password: empty)
+- Backend REST API: `http://localhost:8080`
+- H2 Database Console: `http://localhost:8080/h2-console`
 
 #### 2. Frontend (Angular)
 Requires Node.js 18+ and npm:
@@ -97,6 +92,22 @@ npm start
 
 Access the Angular dev server at `http://localhost:4200`.
 
+### Swagger / OpenAPI
+
+After starting the backend, API documentation is available at:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+OpenAPI JSON:
+
+```text
+http://localhost:8080/v3/api-docs
+```
+
+Swagger UI provides an interactive view of the REST endpoints and makes API review/demo easier.
+
 ---
 
 ### Cloud Deployment Guide
@@ -104,15 +115,34 @@ Access the Angular dev server at `http://localhost:4200`.
 - **Frontend (Vercel):** Connect repository, set Root Directory to `frontend`, Framework to `Angular`, Output Directory to `dist/paycore-frontend/browser`.
 - **Backend (Render):** Connect repository, set Root Directory to `backend`, Runtime to `Docker`.
 
+---
 
 ## Engineering Additions (Internship Work)
 
 ### Automated Backend Testing
-- Added JUnit 5 + Mockito unit tests for Employee, Leave, Salary, Authentication, and JWT security flows.
-- Covered successful flows, validation/error cases, duplicate employee data, unpaid-leave salary deductions, authentication failures, and JWT validation.
-- Current backend unit-test suite: **10 tests**.
+The project already contained basic service-level tests. I extended the automated testing layer with authentication and JWT security coverage.
 
-Run locally:
+Current test classes:
+
+```text
+backend/src/test/java/com/paycore/
+├── service/
+│   ├── EmployeeServiceTest.java
+│   ├── LeaveServiceTest.java
+│   ├── SalaryServiceTest.java
+│   └── AuthServiceTest.java
+└── security/
+    └── JwtTokenProviderTest.java
+```
+
+Coverage includes:
+- Employee lookup and duplicate mobile validation.
+- Leave creation and invalid date-range validation.
+- Unpaid-leave salary deduction and net-pay calculation.
+- Authentication success and missing-user failure handling.
+- JWT generation, username extraction, invalid-token handling, and tampered-token handling.
+
+Run tests locally:
 
 ```bash
 cd backend
@@ -120,18 +150,15 @@ mvn test
 ```
 
 ### Continuous Integration
-GitHub Actions workflow (`.github/workflows/ci.yml`) runs the backend test suite automatically on pushes and pull requests to `main`.
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs the backend Maven test suite automatically on pushes and pull requests to `main`.
 
-### Suggested Next Enhancements
-- Spring Boot integration tests with `@SpringBootTest` + H2/Testcontainers.
-- Controller/API tests with MockMvc.
-- Global exception handling with `@ControllerAdvice`.
-- OpenAPI/Swagger API documentation.
-- Audit logging for payroll and leave actions.
-- Pagination and filtering for employee/leave lists.
-- Role-specific dashboard analytics.
-- Docker health checks and production environment profiles.
+### JWT Validation Hardening
+Invalid JWT signature/security failures are now handled inside the JWT validation boundary and return `false` instead of leaking an unhandled JWT exception to callers.
 
+### API Documentation
+Springdoc OpenAPI + Swagger UI has been added so the REST API can be explored and tested interactively during development and technical demos.
+
+---
 
 ## Architecture
 
@@ -144,22 +171,22 @@ See **[ARCHITECTURE.md](ARCHITECTURE.md)** for Mermaid diagrams covering:
 
 ## Internship Engineering Contributions
 
-The project already contained basic service-level tests. The internship contribution extends that foundation with authentication/security coverage and CI automation:
+The internship work focuses on maintainability, security validation and developer workflow rather than changing the core payroll behavior:
 
 - **JUnit 5 + Mockito:** authentication service and JWT security tests.
-- **JWT validation coverage:** valid, invalid and tampered token scenarios.
+- **JWT validation hardening:** valid, invalid and tampered token scenarios.
 - **GitHub Actions:** automated backend Maven test execution on pushes and pull requests to `main`.
-- **Documentation:** contribution guide and architecture diagrams for technical handover/presentation.
+- **OpenAPI/Swagger:** interactive API documentation for REST endpoints.
+- **Documentation:** architecture diagrams and an internship contribution/presentation guide for technical handover.
 
-### Test Structure
+### Suggested Next Enhancements
 
-```text
-backend/src/test/java/com/paycore/
-├── service/
-│   ├── EmployeeServiceTest.java
-│   ├── LeaveServiceTest.java
-│   ├── SalaryServiceTest.java
-│   └── AuthServiceTest.java
-└── security/
-    └── JwtTokenProviderTest.java
-```
+These are roadmap items and are **not claimed as completed**:
+- Spring Boot integration tests with `@SpringBootTest` + H2/Testcontainers.
+- Controller/API tests with MockMvc.
+- Global exception handling with `@ControllerAdvice`.
+- Audit logging for payroll and leave actions.
+- Pagination and filtering for employee/leave lists.
+- Role-specific dashboard analytics.
+- Docker health checks and production environment profiles.
+- Code coverage reporting with JaCoCo.
