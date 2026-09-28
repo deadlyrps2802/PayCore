@@ -1,104 +1,152 @@
-# PayCore – Internship Add-on / Contribution Guide
+# PayCore – Internship Add-ons & Senior Presentation Guide
 
-## 1. What I Added
+## 1. What Was Already in the Project
 
-The PayCore project already had a basic JUnit 5 + Mockito setup with tests for Employee, Leave and Salary services. I extended the testing and engineering-quality layer rather than presenting it as a completely new testing framework.
-
-### A. Authentication Service Unit Tests
-**File:** `backend/src/test/java/com/paycore/service/AuthServiceTest.java`
-
-Added tests around authentication behavior, including:
-- Successful login/authentication flow.
-- Authentication failure / invalid credentials behavior.
-- Verification of the service interaction with the authentication components.
-
-**Why it matters:** Authentication is a critical part of a payroll system. Testing it reduces the chance of regressions in login-related functionality.
-
-### B. JWT Security Unit Tests
-**File:** `backend/src/test/java/com/paycore/security/JwtTokenProviderTest.java`
-
-Added tests for JWT-related behavior such as:
-- Valid token generation/handling.
-- Username extraction from a token.
-- Invalid/tampered token handling.
-
-**Why it matters:** PayCore uses JWT-based authentication. These tests protect an important security boundary.
-
-### C. GitHub Actions CI Pipeline
-**File:** `.github/workflows/ci.yml`
-
-Added an automated CI workflow that:
-1. Checks out the repository.
-2. Sets up Java 17.
-3. Builds/tests the Spring Boot backend with Maven.
-4. Fails the workflow if the test/build step fails.
-
-**Why it matters:** Every push/PR can automatically validate that the backend still builds and the automated tests pass.
-
-### D. Testing Documentation
-The README was updated with information about the testing/CI additions so another developer can understand how to run and maintain them.
-
----
-
-## 2. Existing Tests That Were Already in the Project
-
-Before my additions, the project already contained unit tests for:
+The project already had a JUnit 5 + Mockito setup and service-level tests for:
 - `EmployeeServiceTest`
 - `LeaveServiceTest`
 - `SalaryServiceTest`
 
-The enhanced version adds:
-- `AuthServiceTest`
-- `JwtTokenProviderTest`
-
-Therefore, the contribution should be presented as **expanding the existing automated testing coverage into authentication/security and CI**, not as creating testing from zero.
+So the internship contribution should be presented as **extending the existing engineering foundation**, not creating testing from zero.
 
 ---
 
-# 3. How to Present My Contribution to Seniors
+## 2. What I Added / Improved
 
-## 30–45 Second Version
+### A. Authentication Service Unit Tests
+**File:** `backend/src/test/java/com/paycore/service/AuthServiceTest.java`
 
-> “During my internship, I worked on improving the engineering quality of the PayCore payroll system. The project already had some service-level JUnit tests, so I extended that foundation into authentication and security testing. I added unit tests for the authentication service and JWT token provider, covering successful and failure scenarios. I also added a GitHub Actions CI workflow so the backend build and tests can be automatically validated whenever code is pushed or reviewed. My focus was on reducing regressions and making the project easier to maintain.”
+Added tests for:
+- Successful authentication and JWT response creation.
+- Missing-user failure behavior after authentication.
+- Verification of interactions with `AuthenticationManager` and `JwtTokenProvider`.
 
----
+**Value:** Protects the login flow from regressions without requiring a real database or external authentication system.
 
-# 4. If They Ask: “What Exactly Did You Add?”
+### B. JWT Security Unit Tests
+**File:** `backend/src/test/java/com/paycore/security/JwtTokenProviderTest.java`
 
-Use this flow:
+Added coverage for:
+- JWT generation.
+- Username extraction.
+- Valid token validation.
+- Invalid token rejection.
+- Tampered token rejection.
 
-### Before
+### C. JWT Validation Hardening
+**File:** `backend/src/main/java/com/paycore/security/JwtTokenProvider.java`
+
+Hardened the validation boundary so JWT security/signature failures are handled and returned as `false` rather than leaking an unhandled JWT runtime exception to callers.
+
+### D. GitHub Actions CI
+**File:** `.github/workflows/ci.yml`
+
+The workflow automatically:
+1. Checks out the repository.
+2. Sets up Java 17.
+3. Enters the `backend` module.
+4. Runs the Maven test suite.
+5. Marks the workflow failed if build/tests fail.
+
+**Value:** Makes backend validation repeatable on pushes and pull requests.
+
+### E. OpenAPI / Swagger API Documentation
+**File:** `backend/pom.xml`
+
+Added Springdoc OpenAPI WebMVC UI using a Spring Boot 3.2-compatible 2.x release.
+
+Swagger UI after starting the backend:
 
 ```text
-PayCore Backend
-      |
-      +-- Employee tests
-      +-- Leave tests
-      +-- Salary tests
-      |
-      +-- Manual validation
+http://localhost:8080/swagger-ui/index.html
 ```
 
-### After
+OpenAPI JSON:
 
 ```text
-                    PayCore Backend
-                          |
-             +------------+-------------+
-             |            |             |
-         Business      Security       CI/CD
-          Tests          Tests         Pipeline
-             |            |             |
-       Employee       Authentication   GitHub
-       Leave          JWT Validation   Actions
-       Salary
+http://localhost:8080/v3/api-docs
+```
+
+**Value:** Gives developers and reviewers an interactive view of the REST API without manually reading controller code.
+
+### F. Centralized REST Exception Handling
+**File:** `backend/src/main/java/com/paycore/exception/GlobalExceptionHandler.java`
+
+Added `@RestControllerAdvice` to standardize error responses for:
+- Validation errors (`MethodArgumentNotValidException`).
+- Bad input (`IllegalArgumentException`).
+- Runtime business/API errors.
+- Unexpected server errors.
+
+The project already had an `ApiResponse<T>` wrapper, so the handler reuses the existing response format instead of introducing a second response contract.
+
+### G. Documentation / Architecture
+Updated:
+- `README.md`
+- `ARCHITECTURE.md`
+- This contribution/presentation guide.
+
+---
+
+## 3. Current Testing Structure
+
+```text
+backend/src/test/java/com/paycore/
+├── service/
+│   ├── EmployeeServiceTest.java
+│   ├── LeaveServiceTest.java
+│   ├── SalaryServiceTest.java
+│   └── AuthServiceTest.java
+└── security/
+    └── JwtTokenProviderTest.java
+```
+
+There are currently 10 test methods across these five test classes.
+
+Run locally:
+
+```bash
+cd backend
+mvn test
 ```
 
 ---
 
-# 5. Demo Plan for the Senior
+# 4. How to Present This to Seniors
 
-## Demo 1 – Show the Test Structure
+## 30–45 Second Summary
+
+> “During my internship, I worked on improving the engineering quality of the PayCore payroll management system. The project already had basic service-level unit tests, so I extended that foundation into authentication and JWT security testing. I also hardened JWT validation, added centralized REST exception handling, introduced OpenAPI/Swagger documentation, and added GitHub Actions CI so backend tests can be automatically executed on repository changes. I also documented the architecture and the engineering changes for easier handover and maintenance.”
+
+---
+
+# 5. Five-Minute Demo Order
+
+## Demo 1 — Start with the Architecture
+
+Show `ARCHITECTURE.md` and explain:
+
+```text
+Angular 17
+    ↓
+REST API
+    ↓
+Spring Boot 3
+    ↓
+Spring Security + JWT
+    ↓
+Service Layer
+    ↓
+Repository Layer
+    ↓
+PostgreSQL / H2
+```
+
+Say:
+
+> “The system follows a layered architecture. The frontend communicates through REST APIs, authentication is handled using Spring Security and JWT, business rules are in services, and persistence is handled through Spring Data JPA.”
+
+## Demo 2 — Show Testing
 
 Open:
 
@@ -106,150 +154,130 @@ Open:
 backend/src/test/java/com/paycore/
 ```
 
-Explain:
+Show the existing business tests and then the two new security/authentication tests.
 
-> “I kept the tests close to the corresponding application layers and added authentication/security coverage on top of the existing business-service tests.”
+Say:
 
-Then show:
-- `EmployeeServiceTest.java`
-- `LeaveServiceTest.java`
-- `SalaryServiceTest.java`
-- `AuthServiceTest.java`
-- `JwtTokenProviderTest.java`
+> “I extended the existing test foundation into the security boundary rather than replacing the existing tests.”
 
-## Demo 2 – Show an Authentication Test
-
-Open `AuthServiceTest.java`.
-
-Explain:
-1. Mock dependencies with Mockito.
-2. Provide controlled input.
-3. Execute the authentication service.
-4. Verify the expected result/interactions.
-5. Test failure behavior separately.
-
-Key phrase:
-
-> “The purpose is to test the service behavior in isolation without depending on a real database or external authentication infrastructure.”
-
-## Demo 3 – Show JWT Tests
+## Demo 3 — Show JWT Security
 
 Open `JwtTokenProviderTest.java`.
 
 Explain:
 
-> “Since JWT is responsible for carrying authenticated identity information, I added tests around token creation/extraction and invalid-token behavior.”
+```text
+Valid JWT       → accepted
+Invalid JWT     → rejected
+Tampered JWT    → rejected
+```
 
-## Demo 4 – Show CI
+Then show `JwtTokenProvider.java` and explain that invalid JWT failures are now contained inside the validation method.
+
+## Demo 4 — Show Exception Handling
 
 Open:
 
 ```text
-.github/workflows/ci.yml
+backend/src/main/java/com/paycore/exception/GlobalExceptionHandler.java
 ```
 
-Explain:
+Say:
 
-> “This moves testing from a purely local activity into CI. A repository change can automatically trigger the backend build and test suite.”
+> “Previously, different service/controller paths could produce inconsistent exception responses. I added a centralized REST exception boundary using `@RestControllerAdvice` and reused the project's existing `ApiResponse` contract.”
 
-Then show the GitHub Actions run if it is available after pushing the repository.
+## Demo 5 — Show Swagger
+
+Start the backend and open:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+Say:
+
+> “This gives the team an interactive API contract. Instead of manually explaining every endpoint, we can inspect and try the REST API from Swagger UI.”
+
+## Demo 6 — Show CI
+
+Open GitHub → **Actions** → **PayCore CI**.
+
+Say:
+
+> “I added a CI workflow that runs the backend Maven test suite automatically on pushes and pull requests.”
+
+**Important:** only describe the run as passing if the GitHub Actions run actually shows a green success result.
 
 ---
 
 # 6. Questions Seniors May Ask
 
-### Q1. Why Mockito?
+### Why Mockito?
 
-**Answer:**
+> “Mockito isolates the class under test by mocking its dependencies. This keeps unit tests fast, deterministic and focused on business behavior.”
 
-> “Mockito allows us to isolate the class under test by mocking its dependencies. That makes the unit test faster, deterministic and focused on the business logic rather than the database or other services.”
+### Why test JWT separately?
 
-### Q2. Why test JWT separately?
+> “JWT sits at the authentication boundary. A regression in token generation or validation can affect access to protected APIs, so it deserves focused tests.”
 
-**Answer:**
+### Why centralized exception handling?
 
-> “JWT is part of the authentication boundary. A regression in token generation or validation can affect authorization across the application, so it deserves focused tests.”
+> “It prevents each controller from having to implement its own generic error formatting and gives API consumers a predictable error response structure.”
 
-### Q3. Unit test vs integration test?
+### Why Swagger?
 
-**Answer:**
+> “It provides an executable API contract for developers and reviewers. It is useful for debugging, integration and handover.”
 
-> “A unit test isolates a class or component and mocks its dependencies. An integration test verifies that multiple real components work together, such as a controller, service and database.”
+### Unit test vs integration test?
 
-### Q4. Why CI?
+> “A unit test isolates a class and mocks dependencies. An integration test verifies that multiple real components work together, such as controller, service, security and database.”
 
-**Answer:**
+### Why CI?
 
-> “Without CI, a developer may push code that works locally but breaks the build or existing tests. CI provides an automated quality gate for changes.”
-
-### Q5. What would you add next?
-
-Say:
-
-> “My next steps would be controller/API integration tests using MockMvc, global exception handling with standardized error responses, OpenAPI/Swagger documentation, pagination and search, and audit logging for sensitive payroll operations.”
+> “It catches regressions automatically instead of depending only on a developer remembering to run tests locally.”
 
 ---
 
-# 7. Strongest Way to Describe the Contribution
+# 7. Strong One-Line Contribution
 
-Avoid:
-
-> “I added some JUnit files.”
-
-Use:
-
-> **“I extended PayCore's automated quality layer by adding authentication and JWT security tests and introduced CI-based automated validation through GitHub Actions.”**
-
-This makes the contribution sound accurate without overstating what was already present.
+> **“I extended PayCore from basic service-level testing toward a more maintainable backend workflow by adding authentication/JWT security coverage, JWT validation hardening, centralized exception handling, Swagger API documentation and automated CI validation.”**
 
 ---
 
-# 8. Suggested GitHub Commit Structure
+# 8. What Not to Claim
 
-If the repository is created/pushed manually:
+Do **not** say:
+- “I created JUnit testing from scratch.”
+- “I built the entire authentication system.”
+- “All tests pass” unless GitHub Actions/local Maven confirms it.
+- “Swagger was already part of my work” before the Swagger addition.
 
-```text
-feat: add authentication service tests
-test: add JWT security unit tests
-ci: add GitHub Actions backend test workflow
-docs: document testing and CI setup
-```
-
-Or as one internship contribution commit:
-
-```text
-feat: improve backend testing and CI pipeline
-```
+The accurate story is that the project already had core functionality and some service tests, and the internship work **extended quality, security validation, documentation and developer workflow**.
 
 ---
 
-# 9. Future Enhancements I Can Explain as Roadmap
+# 9. Future Roadmap
 
-These are **not part of the current additions** unless implemented separately:
+These are roadmap items and should **not** be presented as completed:
 
-1. MockMvc controller/API tests
-2. Global `@ControllerAdvice` exception handling
-3. Swagger/OpenAPI documentation
-4. Employee pagination and filtering
-5. Payroll audit logs
-6. Test coverage reporting
-7. Docker-based CI integration
-8. Integration tests with a test database
-9. API performance/load testing
-10. SonarQube/static code-quality checks
-
-These should be presented as future roadmap items, not completed internship work.
+1. MockMvc controller/API integration tests.
+2. `@SpringBootTest` integration tests with H2/Testcontainers.
+3. JaCoCo code coverage reporting.
+4. Audit logging for sensitive payroll/leave actions.
+5. Employee/leave pagination and filtering.
+6. Role-specific dashboard analytics.
+7. Docker health checks and production profiles.
+8. SonarQube/static analysis.
+9. API performance/load testing.
 
 ---
 
-## Final Presentation Story
+## Final Story
 
-**Problem:** Existing tests covered some business services but authentication/security and automated repository-level validation had less coverage.
+**Problem:** Existing service tests did not cover the authentication/security boundary and there was no documented interactive API contract.
 
-**Action:** Added authentication tests, JWT tests, and GitHub Actions CI.
+**Action:** Added authentication/JWT tests, hardened JWT validation, centralized exception handling, Swagger/OpenAPI documentation and CI automation.
 
-**Technical approach:** JUnit 5 + Mockito + Spring Boot + Maven + GitHub Actions.
+**Technical stack:** Java 17, Spring Boot 3.2.3, Spring Security, JWT, JUnit 5, Mockito, Maven, Springdoc OpenAPI and GitHub Actions.
 
-**Result:** More automated regression protection and a repeatable validation process for backend changes.
-
-**Next:** API integration testing, standardized exception handling, API documentation and observability.
+**Outcome:** The backend has a clearer testing structure, safer JWT validation behavior, consistent REST error handling, interactive API documentation and an automated validation workflow.
