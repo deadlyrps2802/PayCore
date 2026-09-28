@@ -16,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.Period;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -37,9 +40,21 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Object>> register(@Valid @RequestBody RegisterRequest request) {
         String email = request.getEmail().trim().toLowerCase();
+        String domain = email.substring(email.indexOf('@') + 1);
+
+        if (domain.equals("gmail.com") || domain.equals("yahoo.com") || domain.equals("hotmail.com") ||
+            domain.equals("outlook.com") || domain.equals("live.com") || domain.equals("icloud.com")) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Please use your company email address"));
+        }
+
+        if (Period.between(request.getDateOfBirth(), LocalDate.now()).getYears() < 18) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "You must be at least 18 years old to register"));
+        }
+
         if (userRepository.existsByEmail(email)) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(false, "An account with this email already exists"));
         }
+
         User user = new User(email, passwordEncoder.encode(request.getPassword()), Role.ROLE_EMPLOYEE);
         userRepository.save(user);
         return ResponseEntity.ok(new ApiResponse<>(true, "Account created successfully. You can now sign in.", null));
