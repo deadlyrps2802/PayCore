@@ -16,7 +16,7 @@ public class Payslip {
 
     @Column(name = "pay_month", nullable = false)
     private Integer month;
-    @Column(name = "year", nullable = false)
+    @Column(name = "pay_year", nullable = false)
     private Integer year;
     @Column(name = "basic_salary", nullable = false)
     private BigDecimal basicSalary;
