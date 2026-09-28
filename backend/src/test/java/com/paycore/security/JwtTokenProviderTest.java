@@ -34,11 +34,7 @@ class JwtTokenProviderTest {
 
     @Test
     void testGenerateToken_AndExtractUsername() {
-        User principal = User.withUsername("john.doe@paycore.com")
-                .password("encoded")
-                .roles("EMPLOYEE")
-                .build();
-
+        User principal = new User("john.doe@paycore.com", "encoded", java.util.List.of());
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
 
@@ -56,11 +52,7 @@ class JwtTokenProviderTest {
 
     @Test
     void testValidateJwtToken_TamperedToken_ReturnsFalse() {
-        User principal = User.withUsername("john.doe@paycore.com")
-                .password("encoded")
-                .roles("EMPLOYEE")
-                .build();
-
+        User principal = new User("john.doe@paycore.com", "encoded", java.util.List.of());
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
 
