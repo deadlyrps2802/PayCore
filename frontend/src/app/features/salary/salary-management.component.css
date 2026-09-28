@@ -1,0 +1,5 @@
+/* Component-specific styles for Salary Management */
+.payslip-card {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #ffffff;
+}
